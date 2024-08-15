@@ -1,4 +1,4 @@
-package infrastructure
+package infrastructures
 
 import (
 	"golang.org/x/crypto/bcrypt"

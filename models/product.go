@@ -5,7 +5,7 @@ import (
 )
 
 type Product struct {
-    ID          uuid.UUID 		`bson:"_id,omitempty" binding:"required" json:"id,omitempty"`
+    ID          uuid.UUID 		`bson:"_id,omitempty" json:"id,omitempty"`
     Name        string		    `bson:"name,omitempty" json:"name,omitempty"`
     Description string      	`bson:"description,omitempty" json:"description,omitempty"`
     Price       float64     	`bson:"price,omitempty" binding:"required" json:"price,omitempty"`
