@@ -43,9 +43,10 @@ func main() {
 
 	PasswordService := &infrastructures.PasswordService{}
 	JwtService := &infrastructures.JwtService{JwtSecret: jwtSecret}
+	EmailService := &infrastructures.EmailService{}
 
 	var userRepository interfaces.IUserRepo = repositories.NewUserRepository(client, dbName, "users")
-	var authUseCase = usecases.AuthUseCase{UserRepository: userRepository, PwdService: PasswordService, JwtService: JwtService}
+	var authUseCase = usecases.AuthUseCase{UserRepository: userRepository, PwdService: PasswordService, JwtService: JwtService, EmailService: EmailService}
 	authController := controllers.AuthController{AuthUseCase: &authUseCase}
 
 	r := router.SetupRouter(&authController)

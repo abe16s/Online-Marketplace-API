@@ -62,3 +62,20 @@ func (j *JwtService) ValidateToken(token string, isRefresh bool) (string, bool, 
 
 	return claims["email"].(string) ,claims["seller"].(bool), err
 }
+
+
+func (j *JwtService) GenerateActivationToken(email string, isSeller bool) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": 	email,
+		"seller":  	isSeller,
+		"refresh": 	false,
+		"exp": time.Now().Add(10 * time.Minute).Unix(),
+	})
+	activationToken, e := token.SignedString(j.JwtSecret)
+
+	if e != nil {
+		return "", errors.New("can't sign token")
+	}
+
+	return activationToken, nil
+}

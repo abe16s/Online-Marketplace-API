@@ -24,6 +24,7 @@ func SetupRouter(userController *controllers.AuthController) *gin.Engine {
 	router.POST("/register", userController.Register)
 	router.POST("/login", userController.Login)
 	router.GET("/refreshtoken", infrastructures.RefreshMiddleware(jwtservice) ,userController.RefreshToken)
+	router.GET("/activate", userController.ActivateAccount)
 
 
 

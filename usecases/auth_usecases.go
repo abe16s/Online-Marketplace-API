@@ -13,6 +13,7 @@ type AuthUseCase struct {
     UserRepository interfaces.IUserRepo
 	PwdService   interfaces.IPasswordService
 	JwtService	interfaces.IJwtService
+	EmailService interfaces.IEmailService
 }
 
 func (u *AuthUseCase) Register(user *models.User) (*models.User, error) {
@@ -36,27 +37,22 @@ func (u *AuthUseCase) Register(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 
+	u.SendActivationEmail(user.Email, user.IsSeller)
 	return usr, nil
 }
 
-func (u *AuthUseCase) Login(user *models.User) (string, string, error) {
+func (u *AuthUseCase) Login(user *models.User) error {
     existingUser, err := u.UserRepository.FindByEmail(user.Email)
     if err != nil {
-        return "", "", err
+        return err
     }
 
 	match := u.PwdService.ComparePassword(existingUser.Password, user.Password)
 	if !match {
-		return "", "", errors.New("incorrect password")
+		return errors.New("incorrect password")
 	}
-
-	// generate token
-	accessToken, refreshToken, err := u.JwtService.GenerateToken(existingUser.Email, existingUser.IsSeller)
-	if err != nil {
-		return "", "", errors.New("internal server error")
-	}
-
-    return accessToken, refreshToken, nil
+	u.SendActivationEmail(user.Email, user.IsSeller)
+	return nil
 }
 
 func (u *AuthUseCase) RefreshToken(email string, isSeller bool) (string, string, error) {
@@ -69,3 +65,31 @@ func (u *AuthUseCase) RefreshToken(email string, isSeller bool) (string, string,
 }
 
 
+func (u *AuthUseCase) SendActivationEmail(email string, isSeller bool) error {
+	token, err := u.JwtService.GenerateActivationToken(email, isSeller)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	err = u.EmailService.SendActivationEmail(email, token)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	return nil
+}
+
+
+func (u *AuthUseCase) ActivateAccount(token string) (string, string, error) {
+	email, isSeller, err := u.JwtService.ValidateToken(token, false)
+	if err != nil {
+		return "", "", errors.New("invalid token")
+	}
+
+	accessToken, refreshToken, err := u.JwtService.GenerateToken(email, isSeller)
+	if err != nil {
+		return "", "", errors.New("internal server error")
+	}
+
+	return accessToken, refreshToken, nil
+}

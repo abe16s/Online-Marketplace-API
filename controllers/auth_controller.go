@@ -80,13 +80,13 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 		return
     }
 
-    accessToken, refreshToken, err := ctrl.AuthUseCase.Login(&user)
+    err := ctrl.AuthUseCase.Login(&user)
     if err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"access_token": accessToken, "refresh_token": refreshToken})
+    c.Status(http.StatusNoContent)
 }
 
 func (ctrl *AuthController) RefreshToken(c *gin.Context) {
@@ -111,6 +111,22 @@ func (ctrl *AuthController) RefreshToken(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"token": newToken, "refresh_token": newRefreshToken})
 }
 
+
+func (ctrl *AuthController) ActivateAccount(c *gin.Context) {
+    token := c.Query("token")
+    if token == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid activation token"})
+        return
+    }
+
+    accessToken, refreshToken, err := ctrl.AuthUseCase.ActivateAccount(token)
+    if err != nil{
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid activation token"})
+        return
+    }
+
+    c.IndentedJSON(http.StatusOK, gin.H{"access_token": accessToken, "refresh_token": refreshToken})
+}
 
 func (ctrl *AuthController) Logout(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
