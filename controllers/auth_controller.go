@@ -108,8 +108,8 @@ func (ctrl *AuthController) RefreshToken(c *gin.Context) {
         return
     }
 
-    c.SetCookie("access_token", newToken, 300, "/", "localhost", false, true)
-    c.SetCookie("refresh_token", newRefreshToken, 7776000, "/refreshtoken", "localhost", false, true)
+    c.SetCookie("access_token", newToken, 300, "/", "localhost", true, true)
+    c.SetCookie("refresh_token", newRefreshToken, 7776000, "/refreshtoken", "localhost", true, true)
     c.Status(http.StatusNoContent)
 }
 
@@ -127,14 +127,14 @@ func (ctrl *AuthController) ActivateAccount(c *gin.Context) {
         return
     }
 
-    c.SetCookie("access_token", accessToken, 300, "/", "localhost", false, true)
-    c.SetCookie("refresh_token", refreshToken, 7776000, "/refreshtoken", "localhost", false, true)
+    c.SetCookie("access_token", accessToken, 300, "/", "localhost", true, true)
+    c.SetCookie("refresh_token", refreshToken, 7776000, "/refreshtoken", "localhost", true, true)
+    c.Status(http.StatusNoContent)
 }
 
 func (ctrl *AuthController) Logout(c *gin.Context) {
-    // Clear the cookies by setting their expiration time in the past
-    c.SetCookie("access_token", "", -1, "/", "localhost", false, true)
-    c.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
+    c.SetCookie("refresh_token", "", -1, "/refreshtoken", "localhost", true, true)
+    c.SetCookie("access_token", "", -1, "/", "localhost", true, true)
 
-    c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+    c.Status(http.StatusNoContent)
 }
